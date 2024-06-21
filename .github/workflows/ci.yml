@@ -1,0 +1,30 @@
+name: CI
+
+on: [push, pull_request]
+
+jobs:
+  code_quality:
+    name: Code quality
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
+
+      - uses: taiki-e/install-action@just
+      - uses: taiki-e/install-action@v2
+        with:
+          tool: typstyle
+
+      - name: Install yamlfmt
+        run: |
+          curl -sSL https://github.com/google/yamlfmt/releases/latest/download/yamlfmt-linux-amd64 -o /tmp/yamlfmt
+
+          mkdir -p ~/.local/bin
+          mv /tmp/yamlfmt ~/.local/bin/yamlfmt
+          chmod +x ~/.local/bin/yamlfmt
+
+          # Add ~/.local/bin to PATH
+          echo 'export PATH="$HOME/.local/bin:$PATH"' >> $GITHUB_ENV
+
+      - run: just check
+
